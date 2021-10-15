@@ -38,6 +38,7 @@ const player4 = {
   },
 };
 
+
 function createPlayer(playerClass, players) {
   const arenas = document.querySelector(".arenas");
   const player = {
@@ -55,7 +56,9 @@ function createPlayer(playerClass, players) {
   $player.appendChild($progressbar);
 
   const $life = document.createElement("div");
+
   $life.style.width = "100%";
+
   $life.classList.add("life");
   $progressbar.appendChild($life);
 
@@ -75,6 +78,7 @@ function createPlayer(playerClass, players) {
 
 createPlayer("player1", player1);
 createPlayer("player2", player2);
+
 const player1 = {
   name: "Scorpion",
   hp: 50,
@@ -131,3 +135,4 @@ function createPlayer(playerClass, players) {
 
 createPlayer("player1", player1);
 createPlayer("player2", player2);
+
