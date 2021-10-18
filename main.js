@@ -45,6 +45,13 @@ const player4 = {
   },
 };
 
+function randomArena() {
+  const arena = getRandom(4);
+  $arenas.classList.add("arena" + arena);
+}
+
+randomArena();
+
 function createElement(tag, className) {
   const $tag = document.createElement(tag);
   if (className) {
@@ -77,47 +84,68 @@ function createPlayer(playerObj) {
   return $player;
 }
 
-function randomHP(max) {
-  return Math.ceil(Math.random() * max);
-}
-
-function changeHP(player) {
-  const $playerLife = document.querySelector(
-    ".player" + player.player + " .life"
-  );
-
-  const randomNum = randomHP(20);
-  console.log(randomNum);
-
-  if (player.hp <= randomNum) {
-    player.hp = 0;
-  } else {
-    player.hp -= randomNum;
-  }
-
-  $playerLife.style.width = player.hp + "%";
+function changeHP(player, hp) {
+  player.hp -= hp;
 
   if (player.hp <= 0) {
-    if (player === player1) {
-      $arenas.appendChild(playerWin(player2.name));
-    } else {
-      $arenas.appendChild(playerWin(player1.name));
-    }
+    player.hp = 0;
   }
 }
 
-function playerWin(name) {
+function elHP(player) {
+  return document.querySelector(".player" + player.player + " .life");
+}
+
+function renderHP(player, $playerLife) {
+  $playerLife.style.width = player.hp + "%";
+}
+
+function playerWins(name) {
   const $winTitle = createElement("div", "loseTitle");
-  $winTitle.innerText = name + " wins";
-  $randomButton.disabled = true;
+  if (name) {
+    $winTitle.innerText = name + " wins";
+  } else {
+    $winTitle.innerText = "draw";
+  }
 
   return $winTitle;
 }
 
+function getRandom(max) {
+  return Math.ceil(Math.random() * max);
+}
+
 $randomButton.addEventListener("click", function () {
-  changeHP(player1);
-  changeHP(player2);
+  changeHP(player1, getRandom(20));
+  changeHP(player2, getRandom(20));
+  renderHP(player1, elHP(player1));
+  renderHP(player2, elHP(player2));
+
+  if (player1.hp === 0 || player2.hp === 0) {
+    $randomButton.disabled = true;
+    createReloadButton();
+  }
+
+  if (player1.hp === 0 && player1.hp < player2.hp) {
+    $arenas.appendChild(playerWins(player2.name));
+  } else if (player2.hp === 0 && player2.hp < player1.hp) {
+    $arenas.appendChild(playerWins(player1.name));
+  } else if (player1.hp === 0 && player2.hp === 0) {
+    $arenas.appendChild(playerWins());
+  }
 });
+
+function createReloadButton() {
+  const $reloadWrap = createElement("div", "reloadWrap");
+  const $restartButton = createElement("button", "button");
+  $restartButton.innerText = "Restart";
+  $reloadWrap.appendChild($restartButton);
+  $arenas.appendChild($reloadWrap);
+
+  $restartButton.addEventListener("click", function () {
+    window.location.reload();
+  });
+}
 
 $arenas.appendChild(createPlayer(player1));
 $arenas.appendChild(createPlayer(player2));
