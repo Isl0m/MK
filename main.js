@@ -10,6 +10,9 @@ const player1 = {
   attack: function () {
     console.log(this.name + " " + "Fight...");
   },
+  changeHP: changeHP,
+  elHP: elHP,
+  renderHP: renderHP,
 };
 
 const player2 = {
@@ -21,6 +24,9 @@ const player2 = {
   attack: function () {
     console.log(this.name + " " + "Fight...");
   },
+  changeHP: changeHP,
+  elHP: elHP,
+  renderHP: renderHP,
 };
 
 const player3 = {
@@ -32,6 +38,9 @@ const player3 = {
   attack: function () {
     console.log(this.name + " " + "Fight...");
   },
+  changeHP: changeHP,
+  elHP: elHP,
+  renderHP: renderHP,
 };
 
 const player4 = {
@@ -43,6 +52,9 @@ const player4 = {
   attack: function () {
     console.log(this.name + " " + "Fight...");
   },
+  changeHP: changeHP,
+  elHP: elHP,
+  renderHP: renderHP,
 };
 
 function randomArena() {
@@ -84,20 +96,20 @@ function createPlayer(playerObj) {
   return $player;
 }
 
-function changeHP(player, hp) {
-  player.hp -= hp;
+function changeHP(hp) {
+  this.hp -= hp;
 
-  if (player.hp <= 0) {
-    player.hp = 0;
+  if (this.hp <= 0) {
+    this.hp = 0;
   }
 }
 
-function elHP(player) {
-  return document.querySelector(".player" + player.player + " .life");
+function elHP() {
+  return document.querySelector(".player" + this.player + " .life");
 }
 
-function renderHP(player, $playerLife) {
-  $playerLife.style.width = player.hp + "%";
+function renderHP($playerLife) {
+  $playerLife.style.width = this.hp + "%";
 }
 
 function playerWins(name) {
@@ -116,10 +128,10 @@ function getRandom(max) {
 }
 
 $randomButton.addEventListener("click", function () {
-  changeHP(player1, getRandom(20));
-  changeHP(player2, getRandom(20));
-  renderHP(player1, elHP(player1));
-  renderHP(player2, elHP(player2));
+  player1.changeHP(getRandom(20));
+  player2.changeHP(getRandom(20));
+  player1.renderHP(player1.elHP());
+  player2.renderHP(player2.elHP());
 
   if (player1.hp === 0 || player2.hp === 0) {
     $randomButton.disabled = true;
@@ -149,3 +161,4 @@ function createReloadButton() {
 
 $arenas.appendChild(createPlayer(player1));
 $arenas.appendChild(createPlayer(player2));
+
