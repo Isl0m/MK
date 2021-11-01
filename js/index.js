@@ -1,3 +1,14 @@
+function sound(src) {
+  const sound = document.createElement("audio");
+  sound.src = src;
+  sound.setAttribute("preload", "auto");
+  sound.setAttribute("controls", "none");
+  sound.style.display = "none";
+  document.body.appendChild(sound);
+
+  sound.play();
+}
+
 const $parent = document.querySelector(".parent");
 const $player = document.querySelector(".player");
 
@@ -59,6 +70,8 @@ async function init() {
       // При помощи localStorage.getItem('player1'); т.к. в localStorage кладется строка,
       // то мы должны ее распарсить обратным методом JSON.parse(localStorage.getItem('player1'));
       // но это уже будет в нашем классе Game когда мы инициализируем игроков.
+
+      sound(`./names/${item.name}.mp3`);
       localStorage.setItem("player1", JSON.stringify(item));
 
       el.classList.add("active");
@@ -66,8 +79,8 @@ async function init() {
       setTimeout(() => {
         // TODO: Здесь должен быть код который перенаправит вас на ваше игровое поле...
         //  Пример использования: window.location.pathname = 'arenas.html';
-      }, 1000);
-      window.location.pathname = "arenas.html";
+        window.location.pathname = "arenas.html";
+      }, 4000);
     });
 
     img.src = item.avatar;

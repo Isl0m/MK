@@ -1,34 +1,62 @@
-import { getRandom, timeNow } from "./utils.js";
-import { logs, HIT, ATTACK, Player } from "./player.js";
-
-const $arenas = document.querySelector(".arenas");
-const $formFight = document.querySelector(".control");
-const $chat = document.querySelector(".chat");
+import { getRandom, timeNow, logs, HIT, ATTACK, sound } from "./utils.js";
+import { Player } from "./player.js";
 
 class Game {
-  start = () => {
-    class NewPlayer extends Player {
-      constructor(props) {
-        super(props);
-        this.elHP = elHP;
-        this.changeHP = changeHP;
-        this.renderHP = renderHP;
+  getPlayers = async () => {
+    return await fetch(
+      "https://reactmarathon-api.herokuapp.com/api/mk/players"
+    ).then((res) => res.json());
+  };
+
+  getOpponet = async () => {
+    return await fetch(
+      "https://reactmarathon-api.herokuapp.com/api/mk/player/choose"
+    ).then((res) => res.json());
+  };
+
+  postChanges = async (value, hit, defence) => {
+    const body = await fetch(
+      "http://reactmarathon-api.herokuapp.com/api/mk/player/fight",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          value: value,
+          hit: hit,
+          defence: defence,
+        }),
       }
-    }
+    );
 
-    const player1 = new NewPlayer({
+    let result = await body.json();
+
+    return result;
+  };
+
+  start = async () => {
+    let player1;
+    let player2;
+
+    const players = await this.getPlayers();
+    const p1 = JSON.parse(localStorage.getItem("player1"));
+    const p2 = await this.getOpponet();
+
+    player1 = new Player({
+      ...p1,
       player: 1,
-      name: "SCORPION",
-      hp: 100,
-      img: "http://reactmarathon-api.herokuapp.com/assets/scorpion.gif",
+      rootSelector: "arenas",
+    });
+    player2 = new Player({
+      ...p2,
+      player: 2,
+      rootSelector: "arenas",
     });
 
-    const player2 = new NewPlayer({
-      player: 2,
-      name: "SUB ZERO",
-      hp: 100,
-      img: "http://reactmarathon-api.herokuapp.com/assets/subzero.gif",
-    });
+    player1.createPlayer();
+    player2.createPlayer();
+
+    const $arenas = document.querySelector(".arenas");
+    const $formFight = document.querySelector(".control");
+    const $chat = document.querySelector(".chat");
 
     function randomArena() {
       const arena = getRandom(4);
@@ -54,51 +82,11 @@ class Game {
       $reloadButton.innerText = "Restart";
 
       $reloadButton.addEventListener("click", function () {
-        window.location.reload();
+        window.location.pathname = "index.html";
       });
 
       $reloadButtonDiv.appendChild($reloadButton);
       $arenas.appendChild($reloadButtonDiv);
-    }
-
-    function createPlayer({ player, name, hp, img }) {
-      const $player = createElement("div", `player${player}`);
-      const $progressbar = createElement("div", "progressbar");
-      const $life = createElement("div", "life");
-      const $name = createElement("div", "name");
-      const $character = createElement("div", "character");
-      const $img = createElement("img");
-
-      $life.style.width = hp + "%";
-      $name.innerText = name;
-      $img.src = img;
-
-      $progressbar.appendChild($name);
-      $progressbar.appendChild($life);
-
-      $character.appendChild($img);
-
-      $player.appendChild($progressbar);
-      $player.appendChild($character);
-
-      return $player;
-    }
-
-    function changeHP(hp) {
-      this.hp -= hp;
-
-      if (this.hp <= 0) {
-        this.hp = 0;
-      }
-    }
-
-    function elHP() {
-      return document.querySelector(".player" + this.player + " .life");
-    }
-
-    function renderHP() {
-      const $playerLife = this.elHP();
-      $playerLife.style.width = this.hp + "%";
     }
 
     function playerWins(name) {
@@ -112,27 +100,15 @@ class Game {
       return $winTitle;
     }
 
-    $arenas.appendChild(createPlayer(player1));
-    $arenas.appendChild(createPlayer(player2));
-
-    function enemyAttack() {
-      const hit = ATTACK[getRandom(3) - 1];
-      const defence = ATTACK[getRandom(3) - 1];
-
-      return {
-        value: getRandom(HIT[hit]),
-        hit,
-        defence,
-      };
-    }
-
     function showResult() {
       if (player1.hp === 0 && player1.hp < player2.hp) {
         $arenas.appendChild(playerWins(player2.name));
+        sound(`./wins/${player2.name}.mp3`);
         generateLogs("end", player2, player1);
         createReloadButton();
       } else if (player2.hp === 0 && player2.hp < player1.hp) {
         $arenas.appendChild(playerWins(player1.name));
+        sound(`./wins/${player1.name}.mp3`);
         generateLogs("end", player1, player2);
         createReloadButton();
       } else if (player1.hp === 0 && player2.hp === 0) {
@@ -140,25 +116,6 @@ class Game {
         generateLogs("draw");
         createReloadButton();
       }
-    }
-
-    function playerAttack() {
-      const attack = {};
-
-      for (let item of $formFight) {
-        if (item.checked && item.name === "hit") {
-          attack.value = getRandom(HIT[item.value]);
-          attack.hit = item.value;
-        }
-
-        if (item.checked && item.name === "defence") {
-          attack.defence = item.value;
-        }
-
-        item.checked = false;
-      }
-
-      return attack;
     }
 
     function whitchLog(
@@ -175,9 +132,11 @@ class Game {
             .replace("[player1]", name)
             .replace("[player2]", playerName2);
         case "end":
-          return logs[type][getRandom(4) - 1]
+          const logEnd = logs[type][getRandom(4) - 1]
             .replace("[playerWins]", name)
             .replace("[playerLose]", playerName2);
+
+          return logEnd;
         case "hit":
           const logHit = logs[type][getRandom(18) - 1]
             .replace("[playerKick]", name)
@@ -201,6 +160,37 @@ class Game {
       $chat.insertAdjacentHTML("afterbegin", el);
     }
 
+    function playerAttack() {
+      const attack = {};
+
+      for (let item of $formFight) {
+        if (item.checked && item.name === "hit") {
+          attack.value = getRandom(HIT[item.value]);
+          attack.hit = item.value;
+        }
+
+        if (item.checked && item.name === "defence") {
+          attack.defence = item.value;
+        }
+
+        item.checked = false;
+      }
+
+      return attack;
+    }
+
+    function enemyAttack() {
+      const hit = ATTACK[getRandom(3) - 1];
+      const defence = ATTACK[getRandom(3) - 1];
+      const value = getRandom(HIT[hit]);
+
+      return {
+        value,
+        hit,
+        defence,
+      };
+    }
+
     $formFight.addEventListener("submit", (e) => {
       e.preventDefault();
       const { hit: botHit, defence: botDef, value: botVal } = enemyAttack();
@@ -209,16 +199,20 @@ class Game {
       if (myDef !== botHit) {
         player1.changeHP(botVal);
         player1.renderHP();
+        this.postChanges(botVal, botHit, botDef);
         generateLogs("hit", player2, player1, botVal);
       } else {
+        this.postChanges(botVal, botHit, botDef);
         generateLogs("defence", player2, player1);
       }
 
       if (myHit !== botDef) {
         player2.changeHP(myVal);
         player2.renderHP();
+        this.postChanges(myVal, myHit, myDef);
         generateLogs("hit", player1, player2, myVal);
       } else {
+        this.postChanges(myVal, myHit, myDef);
         generateLogs("defence", player1, player2);
       }
 
