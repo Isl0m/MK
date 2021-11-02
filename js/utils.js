@@ -60,6 +60,7 @@ export const logs = {
 
 export const sound = (src) => {
   const sound = document.createElement("audio");
+
   sound.src = src;
   sound.setAttribute("preload", "auto");
   sound.setAttribute("controls", "none");

@@ -214,7 +214,7 @@ body {
   top: 30%;
   width: 300px;
   left: 50%;
-  transform: translate(-50%, 0%);
+  transform: translate(-50%, -50%);
 }
 
 .fight img {
@@ -406,4 +406,7 @@ input[type="radio"]:checked + label > span::before {
 }
 input[type="radio"]:checked + label > span:hover {
   background: none;
+}
+.disp {
+  display: none;
 }
