@@ -1,6 +1,27 @@
 import { getRandom, timeNow, logs, HIT, ATTACK, sound } from "./utils.js";
 import { Player } from "./player.js";
 
+const $arenas = document.querySelector(".arenas");
+const $formFight = document.querySelector(".control");
+const $chat = document.querySelector(".chat");
+
+window.addEventListener("DOMContentLoaded", function () {
+  const arena = getRandom(4);
+  $arenas.classList.add("arena" + arena);
+
+  const $el = '<img class="fight" src="../assets/fight.gif"></img>';
+  sound("./names/FIGHT.mp3");
+
+  $formFight.insertAdjacentHTML("afterbegin", $el);
+
+  setTimeout(() => {
+    const $fight = document.querySelector(".fight");
+    $fight.remove();
+
+    document.querySelector(".disp").classList.remove("disp");
+  }, 1500);
+});
+
 class Game {
   getPlayers = async () => {
     return await fetch(
@@ -54,18 +75,7 @@ class Game {
     player1.createPlayer();
     player2.createPlayer();
 
-    const $arenas = document.querySelector(".arenas");
-    const $formFight = document.querySelector(".control");
-    const $chat = document.querySelector(".chat");
-
-    function randomArena() {
-      const arena = getRandom(4);
-      $arenas.classList.add("arena" + arena);
-
-      generateLogs("start", player1, player2);
-    }
-
-    randomArena();
+    generateLogs("start", player1, player2);
 
     function createElement(tag, className) {
       const $tag = document.createElement(tag);
