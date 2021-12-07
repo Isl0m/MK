@@ -58,7 +58,7 @@ export const logs = {
   draw: "Ничья - это тоже победа!",
 };
 
-export const sound = (src) => {
+export const sound = (src, infinity = false) => {
   const sound = document.createElement("audio");
 
   sound.src = src;
@@ -66,6 +66,19 @@ export const sound = (src) => {
   sound.setAttribute("controls", "none");
   sound.style.display = "none";
   document.body.appendChild(sound);
-
+  if (infinity) {
+    if (typeof sound.loop == "boolean") {
+      sound.loop = true;
+    } else {
+      sound.addEventListener(
+        "ended",
+        function () {
+          this.currentTime = 0;
+          this.play();
+        },
+        false
+      );
+    }
+  }
   sound.play();
 };

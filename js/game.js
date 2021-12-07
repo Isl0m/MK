@@ -6,6 +6,7 @@ const $formFight = document.querySelector(".control");
 const $chat = document.querySelector(".chat");
 
 window.addEventListener("DOMContentLoaded", function () {
+  sound(`./music/${getRandom(4) + 1}.mp3`, 1);
   const arena = getRandom(4);
   $arenas.classList.add("arena" + arena);
 

@@ -1,17 +1,33 @@
-function sound(src) {
-  const sound = document.createElement("audio");
+const $parent = document.querySelector(".parent");
+const $player = document.querySelector(".player");
+
+function sound(src, infinity = false) {
+  const sound = new Audio();
   sound.src = src;
   sound.setAttribute("preload", "auto");
   sound.setAttribute("controls", "none");
   sound.style.display = "none";
   document.body.appendChild(sound);
-
+  if (infinity) {
+    if (typeof sound.loop == "boolean") {
+      sound.loop = true;
+    } else {
+      sound.addEventListener(
+        "ended",
+        function () {
+          this.currentTime = 0;
+          this.play();
+        },
+        false
+      );
+    }
+  }
+  sound.load();
   sound.play();
 }
-
-const $parent = document.querySelector(".parent");
-const $player = document.querySelector(".player");
-
+window.addEventListener("DOMContentLoaded", function () {
+  sound("./music/1.mp3", 1);
+});
 const createElement = (tag, className) => {
   const $tag = document.createElement(tag);
   if (className) {
